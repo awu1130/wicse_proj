@@ -41,3 +41,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Ignore the node_modules directory
+node_modules/
+
+# Ignore environment variable files
+.env

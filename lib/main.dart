@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wicse_proj/api_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,6 +57,25 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  final ApiService apiService = ApiService();
+  List<dynamic> _data = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  void _loadData() async {
+    try {
+      List<dynamic> fetchedData = await apiService.getData();
+      setState(() {
+        _data = fetchedData;
+      });
+    } catch (e) {
+      print('Error getting data: $e');
+    }
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -65,6 +85,11 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+    });
+
+    // Post new counter value to server (just testing if this works for now)
+    apiService.postData({'count': _counter}).catchError((e) {
+      print('Error posting data: $e');
     });
   }
 
