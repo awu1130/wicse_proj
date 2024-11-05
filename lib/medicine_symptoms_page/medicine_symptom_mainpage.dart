@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'medicine_symptom_settings.dart';
 import '../main.dart';
 
@@ -10,63 +12,106 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  // Lists to store symptoms and medicines
   List<String> symptoms = [];
   List<String> medicines = [];
+  int _selectedIndex = 0;
 
-  int _selectedIndex = 0; // Default index for the bottom nav bar
+  @override
+  void initState() {
+    super.initState();
+    fetchData(); // Load data when the page initializes
+  }
 
-  // Method to navigate to the selected page
+  Future<void> fetchData() async {
+    const url = 'http://10.0.2.2:3000/data';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data.isNotEmpty) {
+          setState(() {
+            symptoms = List<String>.from(data[0]['symptoms'] ?? []);
+            medicines = List<String>.from(data[0]['medicines'] ?? []);
+          });
+        }
+        print('Data fetched successfully!');
+      } else {
+        print('Failed to fetch data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+    }
+  }
+
+  Future<void> saveData() async {
+    const url = 'http://10.0.2.2:3000/data';
+
+    final data = {
+      'symptoms': symptoms,
+      'medicines': medicines,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 201) {
+        print('Data saved successfully!');
+      } else {
+        print('Failed to save data. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error saving data: $e');
+    }
+  }
+
+  void _addSymptom() {
+    setState(() {
+      symptoms.add(''); // Add an empty placeholder for user input
+    });
+  }
+
+  void _removeSymptom(int index) {
+    setState(() {
+      symptoms.removeAt(index);
+    });
+    saveData();
+  }
+
+  void _addMedicine() {
+    setState(() {
+      medicines.add(''); // Add an empty placeholder for user input
+    });
+  }
+
+  void _removeMedicine(int index) {
+    setState(() {
+      medicines.removeAt(index);
+    });
+    saveData();
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
-    // Navigate to the corresponding page based on the index
-    if (index == 0) {
-      // Stay on the current page
-    } else if (index == 1) {
-      // Navigate to Home Page
+    if (index == 1) {
       Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MyApp()),
-          ); 
-    } 
-    else if (index == 2) {
-      // Navigate to Settings Page
+        context,
+        MaterialPageRoute(builder: (context) => const MyApp()),
+      );
+    } else if (index == 2) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const MedicineSympSettingsPage()),
       );
     }
-  }
-
-  // Add new symptom
-  void _addSymptom() {
-    setState(() {
-      symptoms.add('');
-    });
-  }
-
-  // Remove symptom
-  void _removeSymptom(int index) {
-    setState(() {
-      symptoms.removeAt(index);
-    });
-  }
-
-  // Add new medicine
-  void _addMedicine() {
-    setState(() {
-      medicines.add('');
-    });
-  }
-
-  // Remove medicine
-  void _removeMedicine(int index) {
-    setState(() {
-      medicines.removeAt(index);
-    });
   }
 
   @override
@@ -81,7 +126,6 @@ class _MainPageState extends State<MainPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Symptom List Section
               _buildListSection(
                 title: 'Symptom List',
                 items: symptoms,
@@ -89,7 +133,6 @@ class _MainPageState extends State<MainPage> {
                 onRemove: _removeSymptom,
               ),
               const SizedBox(height: 20),
-              // Medicine List Section
               _buildListSection(
                 title: 'Medicine List',
                 items: medicines,
@@ -109,7 +152,7 @@ class _MainPageState extends State<MainPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Calendar',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
@@ -123,7 +166,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // Widget to build each section (Symptom and Medicine)
   Widget _buildListSection({
     required String title,
     required List<String> items,
@@ -148,6 +190,12 @@ class _MainPageState extends State<MainPage> {
                 index: index,
                 value: items[index],
                 onRemove: () => onRemove(index),
+                onChanged: (newValue) {
+                  setState(() {
+                    items[index] = newValue;
+                  });
+                  saveData();
+                },
               );
             }),
             const SizedBox(height: 10),
@@ -164,11 +212,11 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // Widget to build each item in the list (with a text field and remove button)
   Widget _buildListItem({
     required int index,
     required String value,
     required VoidCallback onRemove,
+    required ValueChanged<String> onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -182,11 +230,7 @@ class _MainPageState extends State<MainPage> {
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
               ),
-              onChanged: (newValue) {
-                setState(() {
-                  value = newValue;
-                });
-              },
+              onChanged: onChanged,
             ),
           ),
           IconButton(

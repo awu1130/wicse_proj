@@ -187,8 +187,8 @@ class _MyHomePageState extends State<MyHomePage> {
             label: 'Medicine/Symptoms',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Icon(Icons.calendar_month),
+            label: 'Calendar',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
