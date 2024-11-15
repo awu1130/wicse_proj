@@ -14,20 +14,22 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   List<String> symptoms = [];
   List<String> medicines = [];
+  List<TextEditingController> symptomControllers = [];
+  List<TextEditingController> medicineControllers = [];
+  List<FocusNode> symptomFocusNodes = [];
+  List<FocusNode> medicineFocusNodes = [];
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    fetchData(); // Load data when the page initializes
+    fetchData(); // Fetch data initially
   }
 
   Future<void> fetchData() async {
     const url = 'http://10.0.2.2:3000/data';
-
     try {
       final response = await http.get(Uri.parse(url));
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data.isNotEmpty) {
@@ -35,6 +37,7 @@ class _MainPageState extends State<MainPage> {
             symptoms = List<String>.from(data[0]['symptoms'] ?? []);
             medicines = List<String>.from(data[0]['medicines'] ?? []);
           });
+          _initializeControllers();
         }
         print('Data fetched successfully!');
       } else {
@@ -43,6 +46,60 @@ class _MainPageState extends State<MainPage> {
     } catch (e) {
       print('Error fetching data: $e');
     }
+  }
+
+  void _initializeControllers() {
+    // Dispose existing controllers and focus nodes only if the lists are not empty
+    if (symptomControllers.isNotEmpty) {
+      for (var controller in symptomControllers) {
+        controller.dispose();
+      }
+      symptomControllers.clear();
+    }
+    if (symptomFocusNodes.isNotEmpty) {
+      for (var focusNode in symptomFocusNodes) {
+        focusNode.dispose();
+      }
+      symptomFocusNodes.clear();
+    }
+
+    if (medicineControllers.isNotEmpty) {
+      for (var controller in medicineControllers) {
+        controller.dispose();
+      }
+      medicineControllers.clear();
+    }
+    if (medicineFocusNodes.isNotEmpty) {
+      for (var focusNode in medicineFocusNodes) {
+        focusNode.dispose();
+      }
+      medicineFocusNodes.clear();
+    }
+
+    // Initialize new controllers and focus nodes with the latest data
+    symptomControllers = symptoms.map((symptom) {
+      var controller = TextEditingController(text: symptom);
+      var focusNode = FocusNode();
+      focusNode.addListener(() {
+        if (!focusNode.hasFocus) {
+          saveData();
+        }
+      });
+      symptomFocusNodes.add(focusNode);
+      return controller;
+    }).toList();
+
+    medicineControllers = medicines.map((medicine) {
+      var controller = TextEditingController(text: medicine);
+      var focusNode = FocusNode();
+      focusNode.addListener(() {
+        if (!focusNode.hasFocus) {
+          saveData();
+        }
+      });
+      medicineFocusNodes.add(focusNode);
+      return controller;
+    }).toList();
   }
 
   Future<void> saveData() async {
@@ -72,26 +129,54 @@ class _MainPageState extends State<MainPage> {
 
   void _addSymptom() {
     setState(() {
-      symptoms.add(''); // Add an empty placeholder for user input
+      symptoms.add('');
+      var controller = TextEditingController();
+      var focusNode = FocusNode();
+      focusNode.addListener(() {
+        if (!focusNode.hasFocus) {
+          symptoms[symptomControllers.indexOf(controller)] = controller.text;
+          saveData();
+        }
+      });
+      symptomControllers.add(controller);
+      symptomFocusNodes.add(focusNode);
     });
   }
 
   void _removeSymptom(int index) {
     setState(() {
       symptoms.removeAt(index);
+      symptomControllers[index].dispose();
+      symptomFocusNodes[index].dispose();
+      symptomControllers.removeAt(index);
+      symptomFocusNodes.removeAt(index);
     });
     saveData();
   }
 
   void _addMedicine() {
     setState(() {
-      medicines.add(''); // Add an empty placeholder for user input
+      medicines.add('');
+      var controller = TextEditingController();
+      var focusNode = FocusNode();
+      focusNode.addListener(() {
+        if (!focusNode.hasFocus) {
+          medicines[medicineControllers.indexOf(controller)] = controller.text;
+          saveData();
+        }
+      });
+      medicineControllers.add(controller);
+      medicineFocusNodes.add(focusNode);
     });
   }
 
   void _removeMedicine(int index) {
     setState(() {
       medicines.removeAt(index);
+      medicineControllers[index].dispose();
+      medicineFocusNodes[index].dispose();
+      medicineControllers.removeAt(index);
+      medicineFocusNodes.removeAt(index);
     });
     saveData();
   }
@@ -116,52 +201,61 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Medicine Symptoms Page'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildListSection(
-                title: 'Symptom List',
-                items: symptoms,
-                onAdd: _addSymptom,
-                onRemove: _removeSymptom,
-              ),
-              const SizedBox(height: 20),
-              _buildListSection(
-                title: 'Medicine List',
-                items: medicines,
-                onAdd: _addMedicine,
-                onRemove: _removeMedicine,
-              ),
-              const SizedBox(height: 40),
-            ],
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus(); // Deselect the text field when tapping outside
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Medicine Symptoms Page'),
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildListSection(
+                  title: 'Symptom List',
+                  items: symptoms,
+                  controllers: symptomControllers,
+                  focusNodes: symptomFocusNodes,
+                  onAdd: _addSymptom,
+                  onRemove: _removeSymptom,
+                ),
+                const SizedBox(height: 20),
+                _buildListSection(
+                  title: 'Medicine List',
+                  items: medicines,
+                  controllers: medicineControllers,
+                  focusNodes: medicineFocusNodes,
+                  onAdd: _addMedicine,
+                  onRemove: _removeMedicine,
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Medicine/Symptoms',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.black,
-        onTap: _onItemTapped,
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list),
+              label: 'Medicine/Symptoms',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Calendar',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.black,
+          onTap: _onItemTapped,
+        ),
       ),
     );
   }
@@ -169,6 +263,8 @@ class _MainPageState extends State<MainPage> {
   Widget _buildListSection({
     required String title,
     required List<String> items,
+    required List<TextEditingController> controllers,
+    required List<FocusNode> focusNodes,
     required VoidCallback onAdd,
     required Function(int) onRemove,
   }) {
@@ -188,14 +284,9 @@ class _MainPageState extends State<MainPage> {
             ...List.generate(items.length, (index) {
               return _buildListItem(
                 index: index,
-                value: items[index],
+                controller: controllers[index],
+                focusNode: focusNodes[index],
                 onRemove: () => onRemove(index),
-                onChanged: (newValue) {
-                  setState(() {
-                    items[index] = newValue;
-                  });
-                  saveData();
-                },
               );
             }),
             const SizedBox(height: 10),
@@ -214,9 +305,9 @@ class _MainPageState extends State<MainPage> {
 
   Widget _buildListItem({
     required int index,
-    required String value,
+    required TextEditingController controller,
+    required FocusNode focusNode,
     required VoidCallback onRemove,
-    required ValueChanged<String> onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -226,11 +317,18 @@ class _MainPageState extends State<MainPage> {
           const SizedBox(width: 10),
           Expanded(
             child: TextFormField(
-              initialValue: value,
+              controller: controller,
+              focusNode: focusNode,
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
               ),
-              onChanged: onChanged,
+              onChanged: (newValue) {
+                if (symptoms.contains(controller.text)) {
+                  symptoms[index] = newValue;
+                } else {
+                  medicines[index] = newValue;
+                }
+              },
             ),
           ),
           IconButton(
@@ -240,5 +338,22 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    for (var controller in symptomControllers) {
+      controller.dispose();
+    }
+    for (var controller in medicineControllers) {
+      controller.dispose();
+    }
+    for (var focusNode in symptomFocusNodes) {
+      focusNode.dispose();
+    }
+    for (var focusNode in medicineFocusNodes) {
+      focusNode.dispose();
+    }
+    super.dispose();
   }
 }
