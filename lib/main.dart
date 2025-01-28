@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wicse_proj/api_service.dart';
+import 'package:wicse_proj/medicine_symptoms_page/medicine_symptom_mainpage.dart'; // Import the new page
+import 'package:wicse_proj/medicine_symptoms_page/medicine_symptom_settings.dart'; // Import the new page
+
 
 void main() {
   runApp(const MyApp());
@@ -12,6 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -31,8 +35,12 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        
+        
       ),
       home: const MyHomePage(title: 'WiCSE Project'),
+
+      
     );
   }
 }
@@ -93,6 +101,32 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+    int _selectedIndex = 1; // Default index for the bottom nav bar (Home)
+
+  // Method to navigate to the selected page
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    if (index == 0) {
+      // Navigate to Medicine Symptoms Page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MainPage()),
+      );
+    } else if (index == 1) {
+      // No navigation needed, already on Home
+    } else if (index == 2) {
+      // Navigate to Settings Page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MedicineSympSettingsPage()),
+      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -137,6 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -145,6 +180,25 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list),
+            label: 'Medicine/Symptoms',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Calendar',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.black,
+        onTap: _onItemTapped, // Handle item tap
+      ),
     );
   }
 }
