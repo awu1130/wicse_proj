@@ -33,7 +33,7 @@ class HomePage extends StatelessWidget {
                     );
                   },
                   child: Image.asset(
-                    'flower.jpg', // temp flower image
+                    'test.gif', // temp flower image
                     width: 300,
                     height: 200,
                   ),

@@ -1,52 +1,59 @@
+const mongoose = require('mongoose');
 const express = require('express');
-const { MongoClient } = require('mongodb');
-const cors = require('cors');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
-const port = 3000; // Change this to your desired port
 
-app.use(cors());
-  
-app.use(bodyParser.json());
+// middleware
+app.use(cors()); // Allow all origins
+app.use(bodyParser.json()); // Parse incoming JSON requests
 
-// MongoDB connection string URL (i believe you must change to your own!)
-const url = 'mongodb+srv://angelinaaqwu:A3F4%233hB%40q.7DnH@cluster0.bko15.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
-const dbName = 'WiCSEProject'; // Your database name
-let db;
-
-// Connect to MongoDB
-MongoClient.connect(url)
-  .then(client => {
-    console.log('Connected to Database');
-    db = client.db(dbName);
+// mongodb
+mongoose.connect('mongodb+srv://angelinaaqwu:A3F4%233hB%40q.7DnH@cluster0.bko15.mongodb.net', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
   })
-  .catch(err => console.error(err));
+.then(() => console.log('Connected to MongoDB Atlas'))
+.catch((error) => console.error('Error connecting to MongoDB Atlas:', error));
 
-//GET
-app.get('/data', async (req, res) => {
-    try {
-        const data = await db.collection('collection_name').find().toArray();
-        console.log('Data fetched from the database:', data);
-        res.json(data);
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        res.status(500).send('Error fetching data');
-    }
+// user schema
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
 });
-//POST
-app.post('/data', async (req, res) => {
-    try {
-      const result = await db.collection('collection_name').insertOne(req.body);
-      console.log('Data inserted:', result);
-      res.status(201).json(result);
-    } catch (error) {
-      console.error('Error posting data:', error);
-      res.status(500).send('Error posting data');
-    }
+
+const User = mongoose.model('User', userSchema);
+
+// routes
+// register new user
+app.post('/register', async (req, res) => {
+const { username, email, password } = req.body;
+try {
+  // does user already exist?
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    return res.status(400).json({ message: 'Email already in use' });
+  }
+
+  // creates new user
+  const newUser = new User({
+    username,
+    email,
+    password,  // No hashing here, password is stored directly
+  });
+
+  // saves
+  await newUser.save();
+  res.status(201).json({ message: 'User registered successfully' });
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ message: 'Error registering user' });
+}
 });
-  
-// starts server
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+
+// starts
+app.listen(5000, () => {
+console.log('Server running on http://localhost:5000');
 });
