@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:ui'; // for BackdropFilter -- blurry effect
 import 'home.dart';
-import 'signup.dart'; 
-
+import 'signup.dart';
 import 'garden.dart';
 
 import 'package:wicse_proj/medicine_symptoms_page/medicine_symptom_mainpage.dart'; // Import the new page
 import 'package:wicse_proj/medicine_symptoms_page/medicine_symptom_settings.dart'; // Import the new page
-
-
 
 void main() {
   runApp(MyApp());
@@ -20,9 +17,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
+      home: LoginRegisterPage(), // Set the initial screen to LoginRegisterPage
     );
-
   }
 }
 
@@ -54,6 +50,44 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
     }
   }
 
+  // Button builder for both login and signup buttons
+  Widget _buildButton(String text, BuildContext context, {bool isLogin = true}) {
+    return ElevatedButton(
+      onPressed: () {
+        if (isLogin) {
+          _login(context);
+        } else {
+          // navigates to signup page if clicked
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SignupPage()),
+          );
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue, // button color
+        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15), // padding
+      ),
+      child: Text(
+        text,
+        style: TextStyle(color: Colors.white, fontSize: 18),
+      ),
+    );
+  }
+
+  Widget _buildTextField(String label, IconData icon, TextEditingController controller, {bool obscureText = false}) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(),
+        fillColor: Colors.white.withOpacity(0.8),
+        filled: true,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +107,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
               child: Container(
-                color: Colors.black.withOpacity(0.3), 
+                color: Colors.black.withOpacity(0.3),
               ),
             ),
           ),
@@ -88,7 +122,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                     'logo.png', // temp logo - to be replaced with project title
                     height: mq.size.height / 4,
                   ),
-                  SizedBox(height: 5), // to reduce space between logo and tet
+                  SizedBox(height: 5), // to reduce space between logo and text
                   Column(
                     children: [
                       Text(
@@ -110,7 +144,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 10), 
+                  SizedBox(height: 10),
                   _buildTextField('Username', Icons.person, _emailController),
                   SizedBox(height: 20),
                   _buildTextField('Password', Icons.lock, _passwordController, obscureText: true),
@@ -134,22 +168,9 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                 ],
               ),
             ),
-
-        ),
-        onPressed: () {
-          if (isLogin) {
-            _login(context);
-          } else {
-            // navigates to signup page if clicked
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SignupPage()),
-            );
-          }
-        },
+          ),
+        ],
       ),
-
     );
   }
 }
-
