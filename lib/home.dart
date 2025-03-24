@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'garden.dart';
+import 'med_calendar.dart';
+import 'meditation.dart';
 
 class SecondPage extends StatelessWidget {
   @override
@@ -28,8 +31,9 @@ class HomePage extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('pretend we go to the gardening page')),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PlantGrid()),
                     );
                   },
                   child: Image.asset(
@@ -45,9 +49,10 @@ class HomePage extends StatelessWidget {
             alignment: Alignment.bottomCenter, // align soil image to the bottom center
             child: GestureDetector(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('pretend we go to the med page')),
-                );
+                Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SecondRoute()),
+                    );
               },
               child: Image.asset(
                 'soil.jpg', // temp soil image
@@ -60,9 +65,10 @@ class HomePage extends StatelessWidget {
             alignment: Alignment.topLeft, // align sun image to the top-left corner
             child: GestureDetector(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('pretend we go to the mindfulness page')),
-                );
+                Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>RunMyApp()),
+                    );
               },
               child: Padding(
                 padding: const EdgeInsets.all(16.0), // padding

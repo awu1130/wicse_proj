@@ -9,8 +9,13 @@ class SecondRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendar'),
-      ),
+          leading: IconButton(
+            icon: Icon(Icons.home),
+            onPressed: () {
+              Navigator.pop(context); // Go back to HomePage
+            },
+          ),
+        ),
       body: Align(
         alignment: Alignment.topCenter,
         child: Column(
@@ -22,7 +27,7 @@ class SecondRoute extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const BottomNavigationBarExample(),
+      //bottomNavigationBar: const BottomNavigationBarExample(),
     );
   }
 }
@@ -225,6 +230,7 @@ class _CalenderScreenUIState extends State<CalenderScreenUI> {
 
 }
 
+/*
 class BottomNavigationBarExample extends StatefulWidget {
   const BottomNavigationBarExample({super.key});
 
@@ -265,4 +271,4 @@ class _BottomNavigationBarExampleState
       onTap: _onItemTapped,
     );
   }
-}
+}*/

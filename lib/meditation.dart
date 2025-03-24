@@ -15,6 +15,14 @@ class RunMyApp extends StatelessWidget {
       theme: ThemeData(fontFamily: 'HelveticaNeue'),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.home),
+            onPressed: () {
+              Navigator.pop(context); // go back to home
+            },
+          ),
+        ),
         body: DecoratedBox(
           decoration: BoxDecoration(
             image: DecorationImage(
