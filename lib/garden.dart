@@ -125,7 +125,7 @@ class _PlantGridState extends State<PlantGrid> {
           leading: IconButton(
             icon: Icon(Icons.home),
             onPressed: () {
-              Navigator.pop(context); // go back to home
+              Navigator.pop(context); // home page
             },
           ),
           actions: [

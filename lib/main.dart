@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // for BackdropFilter -- blurry effect
+import 'dart:ui';
 import 'home.dart';
 import 'signup.dart';
 import 'garden.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-import 'package:wicse_proj/medicine_symptoms_page/medicine_symptom_mainpage.dart'; // Import the new page
-import 'package:wicse_proj/medicine_symptoms_page/medicine_symptom_settings.dart'; // Import the new page
+import 'package:wicse_proj/medicine_symptom_mainpage.dart';
+import 'package:wicse_proj/medicine_symptom_settings.dart'; 
 
 void main() {
   runApp(MyApp());
@@ -30,14 +32,39 @@ class LoginRegisterPage extends StatefulWidget {
 }
 
 class _LoginRegisterPageState extends State<LoginRegisterPage> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   // validates login
-  void _login(BuildContext context) {
-    String email = _emailController.text;
+  Future<void> _login (BuildContext context) async {
+    String username = _usernameController.text;
     String password = _passwordController.text;
 
+    // Send data to the backend
+    var response = await http.post(
+      Uri.parse('http://localhost:5000/login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'username': username,
+        'password': password,
+      }),
+    );
+    // Check for successful response
+    if (response.statusCode == 201) {
+      // Navigate to Garden after signup
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed. Please try again.')),
+      );
+      print('Error response: ${response.body}');
+    }
+    /*
     if (email == 'admin' && password == 'password') {
       Navigator.push(
         context,
@@ -47,7 +74,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Invalid username or password')),
       );
-    }
+    }*/
   }
 
   // Button builder for both login and signup buttons
@@ -145,7 +172,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                     ],
                   ),
                   SizedBox(height: 10),
-                  _buildTextField('Username', Icons.person, _emailController),
+                  _buildTextField('Username', Icons.person, _usernameController),
                   SizedBox(height: 20),
                   _buildTextField('Password', Icons.lock, _passwordController, obscureText: true),
                   SizedBox(height: 30),

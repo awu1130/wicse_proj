@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'medicine_symptom_mainpage.dart';
-import '../main.dart';
+import 'main.dart';
 
 class MedicineSympSettingsPage extends StatefulWidget {
   const MedicineSympSettingsPage({super.key});
@@ -21,12 +21,12 @@ class _MedicineSympSettingsPageState extends State<MedicineSympSettingsPage> {
     setState(() {
       _selectedIndex = index;
     });
-
+    /*
     if (index == 0) {
       // Navigate to Medicine Symptoms Page
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const MainPage()),
+        MaterialPageRoute(builder: (context) => const MainPage(date: widget.date)),
       );
     } else if (index == 1) {
       // Navigate to Home Page
@@ -36,7 +36,7 @@ class _MedicineSympSettingsPageState extends State<MedicineSympSettingsPage> {
       );
     } else if (index == 2) {
       // Already on Settings Page
-    }
+    }*/
   }
 
   @override
@@ -71,21 +71,18 @@ class _MedicineSympSettingsPageState extends State<MedicineSympSettingsPage> {
               // Future functionality
             },
           ),
+          /*
           ListTile(
             title: const Text('Clear Symptom List'),
             trailing: const Icon(Icons.refresh),
             onTap: () {
               // Future functionality
             },
-          ),
+          ),*/
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Medicine/Symptoms',
-          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: 'Calendar',

@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'dart:ui';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'med_calendar.dart';
+import 'medicine_symptom_mainpage.dart';
+
 class DayDetailsPage extends StatefulWidget {
   final DateTime date;
 
@@ -11,18 +18,21 @@ class DayDetailsPage extends StatefulWidget {
 }
 
 class _DayDetailsPageState extends State<DayDetailsPage> {
-  // List of medicines and their checked status
-  final List<Map<String, dynamic>> medicines = [
-    {"time": "8:30am", "name": "Paracetamol", "isChecked": false},
-    {"time": "12:30pm", "name": "Ibuprofen", "isChecked": false},
-    {"time": "3:00pm", "name": "Amoxicillin", "isChecked": false},
-    {"time": "7:00pm", "name": "Cough Syrup", "isChecked": false},
-  ];
-
-  // List of symptoms with icons
+  // medicines list to save
+  List<Map<String, dynamic>> medicines = [];
+  // symptoms list
   final List<Map<String, dynamic>> symptoms = [];
   final TextEditingController symptomController = TextEditingController();
-  IconData selectedIcon = Icons.sentiment_satisfied; // Default selected icon
+  final TextEditingController medicineNameController = TextEditingController();
+  final TextEditingController medicineTimeController = TextEditingController();
+  // day icon
+  IconData? selectedIcon; 
+
+  @override
+  void initState() {
+    super.initState();
+    _getMeds();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +47,10 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Main content
             Expanded(
               child: ListView(
                 children: [
-                  // Medicines section
+                  // Medicines
                   const Text(
                     "Medicines",
                     style: TextStyle(
@@ -49,7 +58,7 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16), // Space before medicines list
+                  const SizedBox(height: 12), 
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -57,7 +66,7 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                     itemBuilder: (context, index) {
                       return CheckboxListTile(
                         title: Text("${medicines[index]["time"]} - ${medicines[index]["name"]}"),
-                        value: medicines[index]["isChecked"],
+                        value: medicines[index]["isChecked"] ?? false,
                         onChanged: (bool? value) {
                           setState(() {
                             medicines[index]["isChecked"] = value!;
@@ -66,9 +75,20 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                       );
                     },
                   ),
-                  const SizedBox(height: 32), // Space between sections
-
-                  // Symptoms section
+                  const SizedBox(height: 12), 
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MainPage(date: widget.date),
+                        ),
+                      );
+                    },
+                    child: const Text("Adjust Schedule"),
+                  ),
+                  const SizedBox(height: 32),
+                  // Symptoms
                   const Text(
                     "Symptoms",
                     style: TextStyle(
@@ -76,29 +96,20 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16), // Space before symptoms list
+                  const SizedBox(height: 12),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: symptoms.length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        leading: Icon(symptoms[index]["icon"], color: Colors.blue),
                         title: Text(symptoms[index]["name"]),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              symptoms.removeAt(index);
-                            });
-                          },
-                        ),
                       );
                     },
                   ),
-                  const SizedBox(height: 16), // Space between symptoms list and input
+                  const SizedBox(height: 12), 
 
-                  // Input for symptoms
+                  // input symptoms
                   Row(
                     children: [
                       Expanded(
@@ -117,7 +128,7 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                             setState(() {
                               symptoms.add({
                                 "name": symptomController.text,
-                                "icon": selectedIcon,
+                                //"icon": selectedIcon,
                               });
                               symptomController.clear();
                             });
@@ -127,9 +138,9 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8), // Space between input and icons
+                  const SizedBox(height: 24), 
 
-                  // Icon selection
+                  // choose faces
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -149,15 +160,21 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    // Implement Save functionality
-                    Navigator.pop(context, {"symptoms": symptoms, "medicines": medicines});
+                    // save to frontend
+                    Navigator.pop(context, {"symptoms": symptoms, "medicines": medicines, "selectedIcon": selectedIcon});
+                    //_saveMed(context);
                   },
                   child: const Text("Save"),
                 ),
                 OutlinedButton(
                   onPressed: () {
                     // Cancel and go back
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SecondRoute(),
+                      ),
+                    );
                   },
                   child: const Text("Cancel"),
                 ),
@@ -169,34 +186,58 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
     );
   }
 
+
   Widget _buildSelectableIcon(IconData icon, String label) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedIcon = icon; // Update the selected icon
-        });
-      },
-      child: Column(
-        children: [
-          Icon(
-            icon,
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        selectedIcon = icon; 
+      });
+    },
+    child: Column(
+      children: [
+        Icon(
+          icon,
+          color: selectedIcon == icon ? Colors.blue : Colors.grey,
+          size: 36,
+        ),
+        Text(
+          label,
+          style: TextStyle(
             color: selectedIcon == icon ? Colors.blue : Colors.grey,
-            size: 36,
           ),
-          Text(
-            label,
-            style: TextStyle(
-              color: selectedIcon == icon ? Colors.blue : Colors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+  );
+}
+
+  Future<void> _getMeds() async {
+    try {
+      var response = await http.get(
+        Uri.parse('http://localhost:5000/getMeds'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          medicines = List<Map<String, dynamic>>.from(data);
+        });
+      } else {
+        print('Failed to get medicines. Response: ${response.body}');
+      }
+    } catch (e) {
+      print('Error getting medicines: $e');
+    }
   }
 
   @override
   void dispose() {
     symptomController.dispose();
+    medicineNameController.dispose();
+    medicineTimeController.dispose();
     super.dispose();
   }
+
 }

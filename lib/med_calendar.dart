@@ -9,10 +9,10 @@ class SecondRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          leading: IconButton(
+          leading: IconButton( // go back to home
             icon: Icon(Icons.home),
             onPressed: () {
-              Navigator.pop(context); // Go back to HomePage
+              Navigator.pop(context); 
             },
           ),
         ),
@@ -22,7 +22,7 @@ class SecondRoute extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: const [
             Expanded(
-              child: CalenderScreenUI(), // Displaying the calendar widget
+              child: CalenderScreenUI(), 
             ),
           ],
         ),
@@ -44,6 +44,8 @@ class _CalenderScreenUIState extends State<CalenderScreenUI> {
   PageController _pageController =
       PageController(initialPage: DateTime.now().month - 1);
   DateTime _currentMonth = DateTime.now();
+
+  Map<String, IconData> icons = {};
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +152,6 @@ class _CalenderScreenUIState extends State<CalenderScreenUI> {
     );
   }
 
-  // This widget builds the detailed calendar grid for the chosen month.
   Widget buildCalendar(DateTime month) {
     int daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     DateTime firstDayOfMonth = DateTime(month.year, month.month, 1);
@@ -164,10 +165,10 @@ class _CalenderScreenUIState extends State<CalenderScreenUI> {
       child: GridView.builder(
         padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 7, // Always 7 columns for days of the week
-          childAspectRatio: 1.0, // Maintain square cells
-          mainAxisSpacing: 2, // Slight spacing for a clean look
-          crossAxisSpacing: 2, // Slight spacing for a clean look
+          crossAxisCount: 7, // 7 days
+          childAspectRatio: 1.0, 
+          mainAxisSpacing: 2,
+          crossAxisSpacing: 2,
         ),
         itemCount: daysInMonth + weekdayOfFirstDay - 1,
         itemBuilder: (context, index) {
@@ -190,14 +191,23 @@ class _CalenderScreenUIState extends State<CalenderScreenUI> {
                 DateTime(month.year, month.month, index - weekdayOfFirstDay + 2);
             String text = date.day.toString();
 
+            IconData? moodIcon = icons[date.toString()];
+
             return InkWell(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => DayDetailsPage(date: date),
                       ),
                     );
+                    // set icon
+                    if (result != null) {
+                      setState(() {
+                        icons[date.toString()] = result["selectedIcon"];
+                      }
+                    );
+                }
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -206,17 +216,20 @@ class _CalenderScreenUIState extends State<CalenderScreenUI> {
                 ),
                 alignment: Alignment.center,
                 child: Column(
-                  mainAxisSize: MainAxisSize.min, // Minimize vertical space
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.sentiment_very_satisfied,
-                      color: Colors.green,
-                      size: 26.0, // Smaller icon size
-                    ),
-                    const SizedBox(height: 2), // Space between icon and text
+                    // display icon
+                     if (moodIcon != null) 
+                      Icon(
+                        moodIcon,
+                        color: Colors.blue,
+                        size: 26.0,
+                      ),
+                    const SizedBox(height: 2), 
+                    // display date
                     Text(
                       text,
-                      style: const TextStyle(fontSize: 16), // Smaller text
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
@@ -229,46 +242,3 @@ class _CalenderScreenUIState extends State<CalenderScreenUI> {
   }
 
 }
-
-/*
-class BottomNavigationBarExample extends StatefulWidget {
-  const BottomNavigationBarExample({super.key});
-
-  @override
-  State<BottomNavigationBarExample> createState() =>
-      _BottomNavigationBarExampleState();
-}
-
-class _BottomNavigationBarExampleState
-    extends State<BottomNavigationBarExample> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.format_list_bulleted),
-          label: 'Medicine and Symptoms',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
-          label: 'Settings',
-        ),
-      ],
-      currentIndex: _selectedIndex,
-      selectedItemColor: Colors.blue,
-      onTap: _onItemTapped,
-    );
-  }
-}*/

@@ -25,7 +25,7 @@ class _SignupPageState extends State<SignupPage> {
 
     // Send data to the backend
     var response = await http.post(
-      Uri.parse('http://127.0.0.1:5000/register'), // currently localhost
+      Uri.parse('http://localhost:5000/register'), // currently localhost
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -36,20 +36,18 @@ class _SignupPageState extends State<SignupPage> {
       }),
     );
 
-    // Check for successful response
+    // check successful
     if (response.statusCode == 201) {
-      // Successful signup
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sign Up Successful')),
+        SnackBar(content: Text('Welcome to Bloomwell!')),
       );
 
-      // Navigate to HomePage after signup
+      // HomePage after signup
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
       );
     } else {
-      // Error handling
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Signup failed. Please try again.')),
       );
