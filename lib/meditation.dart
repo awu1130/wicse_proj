@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -476,28 +479,104 @@ class JournalEntryScreen extends StatefulWidget {
 }
 
 class _JournalEntryScreenState extends State<JournalEntryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _getJournal();
+  }
+  
   final _textController = TextEditingController();
-  final _entries = <Map<String, String>>[];
+  // entries list to save
+  List<Map<String, dynamic>> entries = [];
 
-  void _saveJournalEntry() {
-    final entry = _textController.text.trim();
-    if (entry.isNotEmpty) {
+  /*void _saveJournalEntry() {
+    final content = _textController.text.trim();
+    if (content.isNotEmpty) {
       final date = DateTime.now();
-      final formattedDate = "${date.day}/${date.month}/${date.year}";
+      final formattedDate = "${date.month}/${date.day}/${date.year}";
       setState(() {
-        _entries.add({
+        entries.add({
           'date': formattedDate,
-          'entry': entry,
+          'content': content,
         });
         _textController.clear();
       });
     }
+  }*/
+
+  void _deleteEntry(int index) async {
+    final entryToDelete = entries[index];
+
+    try {
+      var response = await http.post(
+        Uri.parse('http://localhost:5000/deleteJournal'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({'id': entryToDelete['_id']}),
+      );
+
+      if (response.statusCode == 200) {
+        _getJournal();
+        print('Entry deleted successfully');
+      } else {
+        print('Failed to delete entry. Response: ${response.body}');
+      }
+    } catch (e) {
+      print('Error deleting entry: $e');
+    }
   }
 
-  void _deleteEntry(int index) {
-    setState(() {
-      _entries.removeAt(index);
-    });
+  Future<void> _getJournal() async {
+    try {
+      var response = await http.get(
+        Uri.parse('http://localhost:5000/getJournal'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          entries = List<Map<String, dynamic>>.from(data);
+        });
+      } else {
+        print('Failed to get journal. Response: ${response.body}');
+      }
+    } catch (e) {
+      print('Error getting entries: $e');
+    }
+  }
+
+  Future<void> _saveJournal() async {
+    final content = _textController.text.trim();
+
+    if (content.isEmpty) {
+      return;
+    }
+
+    final date = DateTime.now();
+    final formattedDate = "${date.month}/${date.day}/${date.year}";
+
+    final newEntry = {
+      'date': formattedDate,
+      'content': content,
+    };
+
+    try {
+      var response = await http.post(
+        Uri.parse('http://localhost:5000/saveJournal'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode(newEntry),
+      );
+
+      if (response.statusCode == 201) {
+        _getJournal();
+        _textController.clear();
+        print('Entry saved successfully!');
+      } else {
+        print('Failed to save entry. Response: ${response.body}');
+      }
+    } catch (e) {
+      print('Error saving entry: $e');
+    }
   }
 
   @override
@@ -551,7 +630,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: _saveJournalEntry,
+              onPressed: _saveJournal,
               child: Text('Save Entry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green[50], // Sets the background color
@@ -560,7 +639,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
             SizedBox(height: 16.0),
             Expanded(
               child: ListView.builder(
-                itemCount: _entries.length,
+                itemCount: entries.length,
                 itemBuilder: (context, index) {
                   return Card(
                     margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -571,14 +650,14 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _entries[index]['date']!,
+                            entries[index]['date']!,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.green[700],
                             ),
                           ),
                           SizedBox(height: 8.0),
-                          Text(_entries[index]['entry']!),
+                          Text(entries[index]['content']!),
                           Align(
                             alignment: Alignment.bottomRight,
                             child: IconButton(

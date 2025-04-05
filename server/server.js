@@ -121,7 +121,7 @@ const medicineSchema = new mongoose.Schema({
 
 const Medicine = mongoose.model('Medicine', medicineSchema);
 
-// medicine
+// save medicine
 app.post('/saveMed', async (req, res) => {
   const { name, time } = req.body;
 
@@ -145,6 +145,53 @@ app.get('/getMeds', async (req, res) => {
       res.json(medicines);
   } catch (error) {
       res.status(500).json({ error: error.message });
+  }
+});
+
+// mindfulness corner
+// journal schema
+const journalSchema = new mongoose.Schema({
+  date: { type: String, required: true },
+  content: { type: String, required: true }
+});
+
+const Journal = mongoose.model('Journal', journalSchema);
+
+// save journal entry / get journal entry
+app.post('/saveJournal', async (req, res) => {
+  const { date, content } = req.body;
+
+  try {
+    const newEntry = new Journal({ date, content });
+    await newEntry.save();
+    res.status(201).json({ message: 'Journal saved successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error saving entry', error });
+  }
+});
+
+app.get('/getJournal', async (req, res) => {
+  try {
+      const entries = await Journal.find();
+      res.json(entries);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// delete journal entry
+app.post('/deleteJournal', async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const deleted = await Journal.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).send('Entry not found');
+    }
+    res.status(200).send('Entry deleted');
+  } catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).send('Failed to delete entry');
   }
 });
 
