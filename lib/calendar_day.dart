@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import 'dart:ui';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'med_calendar.dart';
 import 'medicine_symptom_mainpage.dart';
 
@@ -18,20 +16,26 @@ class DayDetailsPage extends StatefulWidget {
 }
 
 class _DayDetailsPageState extends State<DayDetailsPage> {
-  // medicines list to save
   List<Map<String, dynamic>> medicines = [];
-  // symptoms list
-  final List<Map<String, dynamic>> symptoms = [];
+  List<Map<String, dynamic>> symptoms = [];
   final TextEditingController symptomController = TextEditingController();
   final TextEditingController medicineNameController = TextEditingController();
   final TextEditingController medicineTimeController = TextEditingController();
-  // day icon
-  IconData? selectedIcon; 
+  IconData? selectedIcon;
+  List<Map<String, dynamic>> savedDays = [];
+  Map<String, IconData> icons = {}; // Define icons here
 
   @override
   void initState() {
     super.initState();
     _getMeds();
+    _getDays();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _getDays(); // Ensure data is fetched whenever the widget is rebuilt
   }
 
   @override
@@ -50,7 +54,6 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
             Expanded(
               child: ListView(
                 children: [
-                  // Medicines
                   const Text(
                     "Medicines",
                     style: TextStyle(
@@ -58,7 +61,7 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 12), 
+                  const SizedBox(height: 12),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -75,7 +78,7 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                       );
                     },
                   ),
-                  const SizedBox(height: 12), 
+                  const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -88,7 +91,6 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                     child: const Text("Adjust Schedule"),
                   ),
                   const SizedBox(height: 32),
-                  // Symptoms
                   const Text(
                     "Symptoms",
                     style: TextStyle(
@@ -107,9 +109,8 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                       );
                     },
                   ),
-                  const SizedBox(height: 12), 
-
-                  // input symptoms
+                  const SizedBox(height: 12),
+                  // Input symptoms
                   Row(
                     children: [
                       Expanded(
@@ -138,9 +139,8 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24), 
-
-                  // choose faces
+                  const SizedBox(height: 24),
+                  // Choose faces
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -153,16 +153,18 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
                 ],
               ),
             ),
-
             // Save and Cancel buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    // save to frontend
-                    Navigator.pop(context, {"symptoms": symptoms, "medicines": medicines, "selectedIcon": selectedIcon});
-                    //_saveMed(context);
+                  onPressed: () async {
+                    await _saveDay();
+                    Navigator.pop(context, {
+                      "symptoms": symptoms,
+                      "medicines": medicines,
+                      "selectedIcon": selectedIcon,
+                    });
                   },
                   child: const Text("Save"),
                 ),
@@ -186,31 +188,87 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
     );
   }
 
+  Future<void> _saveDay() async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:5000/saveDay'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({
+          'date': widget.date.toIso8601String(),
+          'medicines': medicines,
+          'symptoms': symptoms,
+          'icon': selectedIcon?.codePoint,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        print('Day saved successfully!');
+      } else {
+        print('Failed to save day. Response: ${response.body}');
+      }
+    } catch (e) {
+      print('Error saving day: $e');
+    }
+  }
+
+  Future<void> _getDays() async {
+    try {
+      final response = await http.get(Uri.parse('http://localhost:5000/getDays'));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        Map<String, IconData> fetchedIcons = {};
+
+        for (var day in data) {
+          DateTime savedDate = DateTime.parse(day['date']);
+          if (savedDate.year == widget.date.year && savedDate.month == widget.date.month && savedDate.day == widget.date.day) {
+            // Ensure the correct day is fetched
+            if (day['icon'] != null) {
+              fetchedIcons[savedDate.toString()] = IconData(
+                day['icon'],
+                fontFamily: 'MaterialIcons',
+              );
+            }
+            // Update the medicines and symptoms for this specific day
+            setState(() {
+              symptoms = List<Map<String, dynamic>>.from(day['symptoms']);
+              medicines = List<Map<String, dynamic>>.from(day['medicines']);
+              selectedIcon = fetchedIcons[savedDate.toString()];
+            });
+          }
+        }
+      } else {
+        print("Failed to load days: ${response.body}");
+      }
+    } catch (e) {
+      print("Error loading days: $e");
+    }
+  }
 
   Widget _buildSelectableIcon(IconData icon, String label) {
-  return GestureDetector(
-    onTap: () {
-      setState(() {
-        selectedIcon = icon; 
-      });
-    },
-    child: Column(
-      children: [
-        Icon(
-          icon,
-          color: selectedIcon == icon ? Colors.blue : Colors.grey,
-          size: 36,
-        ),
-        Text(
-          label,
-          style: TextStyle(
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedIcon = icon;
+        });
+      },
+      child: Column(
+        children: [
+          Icon(
+            icon,
             color: selectedIcon == icon ? Colors.blue : Colors.grey,
+            size: 36,
           ),
-        ),
-      ],
-    ),
-  );
-}
+          Text(
+            label,
+            style: TextStyle(
+              color: selectedIcon == icon ? Colors.blue : Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _getMeds() async {
     try {
@@ -239,5 +297,4 @@ class _DayDetailsPageState extends State<DayDetailsPage> {
     medicineTimeController.dispose();
     super.dispose();
   }
-
 }

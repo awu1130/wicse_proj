@@ -153,92 +153,85 @@ class _CalenderScreenUIState extends State<CalenderScreenUI> {
   }
 
   Widget buildCalendar(DateTime month) {
-    int daysInMonth = DateTime(month.year, month.month + 1, 0).day;
-    DateTime firstDayOfMonth = DateTime(month.year, month.month, 1);
-    int weekdayOfFirstDay = firstDayOfMonth.weekday;
+  int daysInMonth = DateTime(month.year, month.month + 1, 0).day;
+  DateTime firstDayOfMonth = DateTime(month.year, month.month, 1);
+  int weekdayOfFirstDay = firstDayOfMonth.weekday;
 
-    DateTime lastDayOfPreviousMonth =
-        firstDayOfMonth.subtract(const Duration(days: 1));
-    int daysInPreviousMonth = lastDayOfPreviousMonth.day;
+  DateTime lastDayOfPreviousMonth = firstDayOfMonth.subtract(const Duration(days: 1));
+  int daysInPreviousMonth = lastDayOfPreviousMonth.day;
 
-    return Container(
-      child: GridView.builder(
-        padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 7, // 7 days
-          childAspectRatio: 1.0, 
-          mainAxisSpacing: 2,
-          crossAxisSpacing: 2,
-        ),
-        itemCount: daysInMonth + weekdayOfFirstDay - 1,
-        itemBuilder: (context, index) {
-          if (index < weekdayOfFirstDay - 1) {
-            int previousMonthDay =
-                daysInPreviousMonth - (weekdayOfFirstDay - index) + 2;
-            return Container(
+  return Container(
+    child: GridView.builder(
+      padding: EdgeInsets.zero,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7, // 7 days
+        childAspectRatio: 1.0, 
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+      ),
+      itemCount: daysInMonth + weekdayOfFirstDay - 1,
+      itemBuilder: (context, index) {
+        if (index < weekdayOfFirstDay - 1) {
+          int previousMonthDay = daysInPreviousMonth - (weekdayOfFirstDay - index) + 2;
+          return Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black, width: 0.5),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              previousMonthDay.toString(),
+              style: const TextStyle(color: Colors.black, fontSize: 12),
+            ),
+          );
+        } else {
+          DateTime date = DateTime(month.year, month.month, index - weekdayOfFirstDay + 2);
+          String text = date.day.toString();
+
+          // Fetch the saved mood icon for this date
+          IconData? moodIcon = icons[date.toString()];
+
+          return InkWell(
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DayDetailsPage(date: date),
+                ),
+              );
+              if (result != null) {
+                setState(() {
+                  icons[date.toString()] = result["selectedIcon"];
+                });
+              }
+            },
+            child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 0.5),
+                border: Border.all(color: Colors.grey.shade300, width: 0.5),
                 borderRadius: BorderRadius.circular(4),
               ),
               alignment: Alignment.center,
-              child: Text(
-                previousMonthDay.toString(),
-                style: const TextStyle(color: Colors.black, fontSize: 12),
-              ),
-            );
-          } else {
-            DateTime date =
-                DateTime(month.year, month.month, index - weekdayOfFirstDay + 2);
-            String text = date.day.toString();
-
-            IconData? moodIcon = icons[date.toString()];
-
-            return InkWell(
-              onTap: () async {
-                final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DayDetailsPage(date: date),
-                      ),
-                    );
-                    // set icon
-                    if (result != null) {
-                      setState(() {
-                        icons[date.toString()] = result["selectedIcon"];
-                      }
-                    );
-                }
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300, width: 0.5),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // display icon
-                     if (moodIcon != null) 
-                      Icon(
-                        moodIcon,
-                        color: Colors.blue,
-                        size: 26.0,
-                      ),
-                    const SizedBox(height: 2), 
-                    // display date
-                    Text(
-                      text,
-                      style: const TextStyle(fontSize: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (moodIcon != null)
+                    Icon(
+                      moodIcon,
+                      color: Colors.blue,
+                      size: 26.0,
                     ),
-                  ],
-                ),
+                  const SizedBox(height: 2),
+                  Text(
+                    text,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
               ),
-            );
-          }
-        },
-      ),
-    );
-  }
-
+            ),
+          );
+        }
+      },
+    ),
+  );
+}
 }

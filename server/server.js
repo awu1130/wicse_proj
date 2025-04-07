@@ -148,6 +148,59 @@ app.get('/getMeds', async (req, res) => {
   }
 });
 
+// delete med entry
+app.post('/deleteMed', async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const deleted = await Medicine.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).send('Entry not found');
+    }
+    res.status(200).send('Entry deleted');
+  } catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).send('Failed to delete entry');
+  }
+});
+
+// save calendar day 
+const daySchema = new mongoose.Schema({
+  date: Date,
+  medicines: [
+    { name: String, time: String, isChecked: Boolean, }
+  ],
+  symptoms: [
+    {      name: String,    }
+  ],
+  icon: Number,
+});
+
+const Day = mongoose.model('Day', daySchema);
+
+app.post('/saveDay', async (req, res) => {
+  const { date, medicines, symptoms, icon } = req.body;
+
+  try {
+    const newDay = new Day({ date, medicines, symptoms, icon });
+    await newDay.save();
+    res.status(201).json({ message: 'Day saved successfully' });
+  } catch (err) {
+    console.error('Failed to save day:', err);
+    res.status(500).json({ message: 'Failed to save day', error: err });
+  }
+});
+
+app.get('/getDays', async (req, res) => {
+  try {
+    const days = await Day.find();
+    res.json(days);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error fetching saved days');
+  }
+});
+
 // mindfulness corner
 // journal schema
 const journalSchema = new mongoose.Schema({

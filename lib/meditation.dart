@@ -489,21 +489,6 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
   // entries list to save
   List<Map<String, dynamic>> entries = [];
 
-  /*void _saveJournalEntry() {
-    final content = _textController.text.trim();
-    if (content.isNotEmpty) {
-      final date = DateTime.now();
-      final formattedDate = "${date.month}/${date.day}/${date.year}";
-      setState(() {
-        entries.add({
-          'date': formattedDate,
-          'content': content,
-        });
-        _textController.clear();
-      });
-    }
-  }*/
-
   void _deleteEntry(int index) async {
     final entryToDelete = entries[index];
 
@@ -643,7 +628,7 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
                 itemBuilder: (context, index) {
                   return Card(
                     margin: EdgeInsets.symmetric(vertical: 8.0),
-                    color: Colors.green[50], // Set the background color for saved entries
+                    color: Colors.green[50], 
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(

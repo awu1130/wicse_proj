@@ -45,9 +45,14 @@ class _MainPageState extends State<MainPage> {
                   return ListTile(
                     title: Text(medicines[index]["name"]),
                     subtitle: Text("${medicines[index]["time"]}"),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _deleteMed(index),
+                    ),
                   );
                 },
               ),
+
             ),
             Row(
               children: [
@@ -117,6 +122,27 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
     );
+  }
+
+  void _deleteMed(int index) async {
+    final medToDelete = medicines[index];
+
+    try {
+      var response = await http.post(
+        Uri.parse('http://localhost:5000/deleteMed'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({'id': medToDelete['_id']}),
+      );
+
+      if (response.statusCode == 200) {
+        _getMeds();
+        print('Entry deleted successfully');
+      } else {
+        print('Failed to delete entry. Response: ${response.body}');
+      }
+    } catch (e) {
+      print('Error deleting entry: $e');
+    }
   }
 
   Future<void> _getMeds() async {
