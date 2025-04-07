@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'garden.dart';
 import 'med_calendar.dart';
 import 'meditation.dart';
+import 'water_intake.dart';
 
 class SecondPage extends StatelessWidget {
   @override
@@ -84,9 +85,10 @@ class HomePage extends StatelessWidget {
             alignment: Alignment.topRight, // align can image to the top-right corner
             child: GestureDetector(
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('pretend we go to the water page')),
-                );
+                Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) =>WaterIntakePage()),
+                    );
               },
               child: Padding(
                 padding: const EdgeInsets.all(16.0), // padding

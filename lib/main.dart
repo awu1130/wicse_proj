@@ -64,17 +64,6 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
       );
       print('Error response: ${response.body}');
     }
-    /*
-    if (email == 'admin' && password == 'password') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid username or password')),
-      );
-    }*/
   }
 
   // Button builder for both login and signup buttons
