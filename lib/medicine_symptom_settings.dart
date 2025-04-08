@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'medicine_symptom_mainpage.dart';
+import 'medicine/medicine_symptom_mainpage.dart';
 import 'main.dart';
 
 class MedicineSympSettingsPage extends StatefulWidget {

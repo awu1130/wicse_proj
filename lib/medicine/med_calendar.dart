@@ -50,28 +50,40 @@ class _CalenderScreenUIState extends State<CalenderScreenUI> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          _buildHeader(),
-          _buildWeeks(),
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentMonth =
-                      DateTime(_currentMonth.year, (index % 12) + 1, 1);
-                });
-              },
-              itemCount: 12 * 10, // Adjustable years count
-              itemBuilder: (context, pageIndex) {
-                DateTime month =
-                    DateTime(_currentMonth.year, (pageIndex % 12) + 1, 1);
-                return buildCalendar(month);
-              },
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              const Color.fromARGB(255, 138, 184, 222),
+              const Color.fromARGB(255, 175, 225, 176),
+            ],
           ),
-        ],
+        ),
+        child: Column(
+          children: [
+            _buildHeader(),
+            _buildWeeks(),
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentMonth =
+                        DateTime(_currentMonth.year, (index % 12) + 1, 1);
+                  });
+                },
+                itemCount: 12 * 10, // Adjustable years count
+                itemBuilder: (context, pageIndex) {
+                  DateTime month =
+                      DateTime(_currentMonth.year, (pageIndex % 12) + 1, 1);
+                  return buildCalendar(month);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

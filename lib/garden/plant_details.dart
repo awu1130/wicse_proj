@@ -64,11 +64,11 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
                     borderRadius: BorderRadius.circular(20), // Rounded corners
                     child: Image.asset(
                       widget.plantImagePath,
-                      height: 200,
+                      height: 170,
                       fit: BoxFit.cover,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: _incrementWaterLevel,
                     style: ElevatedButton.styleFrom(
@@ -83,7 +83,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
                     ),
                     child: Text('Tap to Water'),
                   ),
-                  SizedBox(height: 40),
+                  SizedBox(height: 15),
                   Container(
                     width: 200,
                     height: 20,

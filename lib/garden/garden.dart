@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'main.dart';
+import '../main.dart';
 import 'plant_details.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;

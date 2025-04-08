@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'home.dart';
-import 'signup.dart';
-import 'garden.dart';
+import 'registration/home.dart';
+import 'registration/signup.dart';
+import 'garden/garden.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:wicse_proj/medicine_symptom_mainpage.dart';
+import 'package:wicse_proj/medicine/medicine_symptom_mainpage.dart';
 import 'package:wicse_proj/medicine_symptom_settings.dart'; 
 
 void main() {

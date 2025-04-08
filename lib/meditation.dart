@@ -48,9 +48,10 @@ class CarouselExample extends StatefulWidget {
 class _CarouselExampleState extends State<CarouselExample> {
   late PageController _pageController;
   int _currentIndex = 0;
+  /*
   bool _isAddingTask = false;
   List<String> tasks = [];
-  final TextEditingController _taskController = TextEditingController();
+  final TextEditingController _taskController = TextEditingController();*/
 
   @override
   void initState() {
@@ -61,10 +62,10 @@ class _CarouselExampleState extends State<CarouselExample> {
   @override
   void dispose() {
     _pageController.dispose();
-    _taskController.dispose();
+    //_taskController.dispose();
     super.dispose();
   }
-
+  /*
   void _addTask(String task) {
     if (task.isNotEmpty) {
       setState(() {
@@ -73,7 +74,7 @@ class _CarouselExampleState extends State<CarouselExample> {
         _taskController.clear();
       });
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +98,7 @@ class _CarouselExampleState extends State<CarouselExample> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             SizedBox(
               height: 300,
               child: PageView.builder(
@@ -199,16 +200,16 @@ class _CarouselExampleState extends State<CarouselExample> {
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: TaskCard(
+              /*child: TaskCard(
                 onAddPressed: () {
                   setState(() {
                     _isAddingTask = true;
                   });
                 },
-              ),
+              ),*/
             ),
             const SizedBox(height: 20),
-            Expanded(
+            /*Expanded(
               child: ListView.builder(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 itemCount: tasks.length,
@@ -242,10 +243,10 @@ class _CarouselExampleState extends State<CarouselExample> {
                   );
                 },
               ),
-            ),
+            ),*/
           ],
         ),
-        if (_isAddingTask)
+        /*if (_isAddingTask)
           GestureDetector(
             onTap: () {
               setState(() {
@@ -304,7 +305,7 @@ class _CarouselExampleState extends State<CarouselExample> {
                 ),
               ),
             ),
-          ),
+          ),*/
       ],
     );
   }
@@ -666,8 +667,8 @@ class _JournalEntryScreenState extends State<JournalEntryScreen> {
 
 enum ImageInfo {
   image0('Breathing Exercise', 'Quick Grounding Guided Breathing.', 'assets/img/breathe.jpg'),
-  image2('Quick Journal Exercise', 'Quick Entries to Gather Your Thoughts.', 'assets/img/journal.jpg'),
-  image3('Music Meditation', 'Jam Out and Unwind', 'assets/img/music.jpg');
+  image2('Quick Journal Exercise', 'Quick Entries to Gather Your Thoughts.', 'assets/img/journal.jpg');
+  //image3('Music Meditation', 'Jam Out and Unwind', 'assets/img/music.jpg');
 
   const ImageInfo(this.title, this.subtitle, this.url);
   final String title;
