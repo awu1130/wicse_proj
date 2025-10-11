@@ -108,7 +108,7 @@ app.use(cors()); // Allow all origins
 app.use(bodyParser.json()); // Parse incoming JSON requests
 
 // mongodb
-mongoose.connect('mongodb+srv://angelinaaqwu:A3F4%233hB%40q.7DnH@cluster0.bko15.mongodb.net', {
+mongoose.connect(mongo, {url,
   useNewUrlParser: true,
   useUnifiedTopology: true,
   })
