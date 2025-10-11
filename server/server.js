@@ -33,7 +33,7 @@ const plantSchema = new mongoose.Schema({
 });
 
 // MongoDB connection string URL
-const url = 'mongodb+srv://angelinaaqwu:A3F4%233hB%40q.7DnH@cluster0.bko15.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const url = var.mongoDB;
 const dbName = 'WiCSEProject';
 let db;
 
