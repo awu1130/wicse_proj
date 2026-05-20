@@ -3,6 +3,13 @@ import 'dart:ui'; // for BackdropFilter -- blurry effect
 import 'home.dart';
 import 'signup.dart'; 
 
+import 'garden.dart';
+
+import 'package:wicse_proj/medicine_symptoms_page/medicine_symptom_mainpage.dart'; // Import the new page
+import 'package:wicse_proj/medicine_symptoms_page/medicine_symptom_settings.dart'; // Import the new page
+
+
+
 void main() {
   runApp(MyApp());
 }
@@ -13,9 +20,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: LoginRegisterPage(),
+
     );
+
   }
 }
 
@@ -46,6 +53,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -126,53 +134,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildTextField(String label, IconData icon, TextEditingController controller, {bool obscureText = false}) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 18.0,
-      ),
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.2),
-        hintText: label,
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-        prefixIcon: Icon(
-          icon,
-          color: Colors.white,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButton(String text, BuildContext context, {bool isLogin = true}) {
-    return Material(
-      elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
-      color: isLogin ? Color(0xFF6F4F37) : Color(0xFF3E2723), // Soil-like browns
-      child: MaterialButton(
-        minWidth: MediaQuery.of(context).size.width / 1.5,
-        padding: EdgeInsets.symmetric(vertical: 15.0),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 20.0,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
         ),
         onPressed: () {
           if (isLogin) {
@@ -186,6 +148,8 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
           }
         },
       ),
+
     );
   }
 }
+
